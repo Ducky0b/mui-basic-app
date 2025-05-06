@@ -1,33 +1,25 @@
-import React from "react";
-import jobs from "../data/data.json";
+import React, { useEffect, useState } from "react";
+import RequireAuth from "../auth/RequiredAuth";
+import api from "../data/fetchData";
 import { useParams } from "react-router-dom";
-import { Container, Typography, Box } from "@mui/material";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import ApartmentIcon from '@mui/icons-material/Apartment';
-function DetailPage() {
-  const params = useParams();
-  const jobID = params.id;
-  const job = jobs.find((job) => job.id === jobID);
-  console.log(job);
-  if (!job)
-    return (
-      <Typography variant="h3" marginTop={3}>
-        No job found
-      </Typography>
-    );
+
+function JobDetail() {
+  const [job, setJob] = useState();
+  let { id } = useParams();
+  useEffect(() => {
+    const fetch = async () => {
+      const data = await api.getJob(id);
+      setJob(data);
+    };
+    fetch();
+  }, [id]);
   return (
-    <Container sx={{ color: "white" }}>
-      <Typography variant="h3" marginTop={3}>
-        {job.title}
-      </Typography>
-      <Box marginTop={3} sx={{ display: "flex" }} alignItems="center">
-        <ApartmentIcon /> {job.companyId}
-      </Box>
-      <Box marginTop={3} sx={{ display: "flex" }} alignItems="center">
-        <LocationOnIcon /> {job.city}
-      </Box>
-    </Container>
+    <div>
+      <RequireAuth callback={() => {}}>
+        <h1 style={{ color: "white" }}>{job?.title}</h1>
+      </RequireAuth>
+    </div>
   );
 }
 
-export default DetailPage;
+export default JobDetail;

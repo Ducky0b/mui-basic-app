@@ -1,48 +1,53 @@
-import React, { useState } from "react";
-import { ThemeProvider, CssBaseline, Button, Box } from "@mui/material";
-import { lightTheme, darkTheme } from "./theme/index";
-import SearchAppBar from "./components/SearchAppBar";
-import HomePage from "./pages/HomePage";
-import DetailPage from "./pages/DetailPage";
-import { Routes, Route } from "react-router-dom";
+import React, { useContext } from "react";
+import Layout from "./pages/Layout";
+import JobDetailModal from "./components/JobDetailModal";
+import { Routes, Route, useLocation } from "react-router-dom";
+import AuthContext from "./auth/AuthContext";
+import LoginModal from "./components/LoginFormModal";
+import RequireAuth from "./auth/RequiredAuth";
 import "./App.css";
-// const theme = createTheme({
-//   shape: { borderRadius: 8 },
-// });
+
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+  const location = useLocation();
+  const auth = useContext(AuthContext);
+
+  // Xác định nếu đang hiển thị modal hoặc không
+  const backgroundLocation = location.state?.backgroundLocation;
+  console.log("backgroundLocation App", backgroundLocation);
   return (
-    <div>
-      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-        <CssBaseline />
-        <Box
-          sx={{
-            bgcolor: "background.default",
-            color: "text.primary",
-          }}
-        >
-          <SearchAppBar />
-          <Box textAlign="center" mt={2}>
-            <Button variant="outlined" onClick={toggleTheme}>
-              {isDarkMode ? "Light" : "Dark"} Mode
-            </Button>
-          </Box>
-        </Box>
+    <>
+      {/* Routes chính - không hiển thị khi modal được mở */}
+      <Routes location={backgroundLocation || location}>
+        <Route path="/" element={<Layout />}>
+          <Route path="/login" element={<LoginModal />} />
+        </Route>
+
+        <Route
+          path="*"
+          element={
+            <main>
+              <p style={{ color: "white" }}>There's nothing here!</p>
+            </main>
+          }
+        />
+      </Routes>
+
+      {/* Routes cho modal - chỉ hiển thị khi có backgroundLocation */}
+      {backgroundLocation && (
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/job/:id" element={<DetailPage />} />
           <Route
-            path="*"
+            path="/job/:id"
             element={
-              <main>
-                <p style={{ color: "white" }}>There's nothing here!</p>
-              </main>
+              <RequireAuth>
+                <JobDetailModal />
+              </RequireAuth>
             }
           />
+          {/* Đảm bảo route login cũng được hiển thị như modal khi cần */}
+          <Route path="/login" element={<LoginModal />} />
         </Routes>
-      </ThemeProvider>
-    </div>
+      )}
+    </>
   );
 }
 

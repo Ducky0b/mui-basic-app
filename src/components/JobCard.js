@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useContext, useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
@@ -6,13 +6,21 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import AuthContext from "../auth/AuthContext";
 
-export default function JobCard({ jobs }) {
+export default function JobCard({ description, title, id, skills }) {
+  const auth = useContext(AuthContext);
   const navigate = useNavigate();
+  let location = useLocation();
+  const handleClick = () => {
+    // Lưu trữ vị trí hiện tại để sau khi modal đóng có thể quay lại
+    navigate(`/job/${id}`, { state: { backgroundLocation: location } });
+    console.log("Click Job Card", location);
+  };
+
   return (
     <Card
-      onClick={() => navigate(`/job/${jobs.id}`)}
       sx={{
         height: "100%",
         display: "flex",
@@ -35,31 +43,31 @@ export default function JobCard({ jobs }) {
             borderBottom: "1px solid #ccc",
           }}
         >
-          {jobs.title}
+          {title}
         </Typography>
         <Typography variant="h5" component="div">
           <Stack direction="row" sx={{ flexWrap: "wrap" }}>
-            {jobs.skills.slice(0, 4).map((job, index) => (
+            {skills.slice(0, 4).map((skill, index) => (
               <Chip
                 key={index}
-                label={job}
+                label={skill}
                 size="small"
                 sx={{
                   bgcolor: "#df4747",
                   color: "white",
                   margin: "2px",
                   padding: "2px",
+                  fontSize: "0.6rem",
                 }}
               />
             ))}
           </Stack>
         </Typography>
-        <Typography sx={{ color: "white", mb: 1.5 }}>
-          {jobs.description}
-        </Typography>
+        <Typography sx={{ color: "white", mb: 1.5 }}>{description}</Typography>
       </CardContent>
       <CardActions sx={{ justifyContent: "center", mt: "auto" }}>
         <Button
+          onClick={handleClick}
           variant="contained"
           size="small"
           sx={{ bgcolor: "yellow", color: "black" }}
